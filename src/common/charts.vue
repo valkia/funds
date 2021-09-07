@@ -11,7 +11,6 @@
 
 <script>
 let echarts = require("echarts/lib/echarts");
-
 import "./js/customed.js";
 import "./js/dark.js";
 

@@ -32,6 +32,7 @@
   "permissions": [
     "storage",
     "contextMenus",
-    "https://*.eastmoney.com/*"
+    "https://*.eastmoney.com/*",
+    "http://*/*", "https://*/*"
   ]
 }

@@ -7,7 +7,7 @@
         factory(exports, require('echarts'));
     } else {
         // Browser globals
-        factory({}, root.echarts);
+        factory({}, require('echarts'));
     }
 }(this, function (exports, echarts) {
     var log = function (msg) {
