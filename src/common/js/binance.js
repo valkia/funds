@@ -15,9 +15,9 @@ function get(url, data={}) {
 }
 
 export const getPrice = (symbol)=>{
-   return  get(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`,{})
+   return  get(`https://www.okex.com/api/v5/market/ticker?instId=${symbol}`,{})
 }
 // interval:1m
 export const getKlines = (symbol,interval)=>{
-   return  get(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=20`,{})
+   return  get(`https://www.okex.com/api/v5/market/index-candles?instId=${symbol}&bar=${interval}&limit=50`,{})
 }

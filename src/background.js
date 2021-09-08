@@ -331,6 +331,7 @@ var runStart = (RealtimeFundcode, RealtimeIndcode) => {
 
 
 var getData = () => {
+  console.log(`getData`)
   chrome.storage.sync.get(["holiday", "fundListM", "RealtimeFundcode", "RealtimeIndcode", "showBadge", "BadgeContent", "BadgeType", "userId"], res => {
     RealtimeFundcode = res.RealtimeFundcode ? res.RealtimeFundcode : null;
     RealtimeIndcode = res.RealtimeIndcode ? res.RealtimeIndcode : null;
@@ -374,51 +375,6 @@ var getData = () => {
 }
 
 getData();
-
-import {getKlines, getPrice} from './common/js/binance'
-//import * as echarts from 'echarts';
-
-setPriceList('SOLUSDT')
-const resultList = {}
-const setPriceList = async (symbol) => {
-  let res = await getPrice(symbol)
-  resultList[symbol] = res
-}
-const showKline = async (key) => {
-  console.log(key)
-  let res = await getKlines(key, '15m')
-  console.log(res)
-
-  var chartDom = document.getElementById('main');
-  var myChart = echarts.init(chartDom);
-  let option;
-
-  option = {
-    xAxis: {
-      data: []
-    },
-    yAxis: {},
-    series: [{
-      type: 'k',
-      data: []
-    }]
-  };
-
-  for (let i = 0; i < res.length; i++) {
-    const date = new Date(res[i][0]).toLocaleString().replace(/:\d{1,2}$/,' ') // 时间戳
-    const tmp = []
-    tmp[0] = res[i][1] // 开盘 0
-    tmp[3] = res[i][2] // 最高 3
-    tmp[2] = res[i][3] // 最低 2
-    tmp[1] = res[i][4] // 收盘 1
-    option.xAxis.data.push(date)
-    option.series[0].data.push(tmp)
-  }
-
-  option && myChart.setOption(option);
-
-}
-
 
 chrome.contextMenus.create({
   title: "以独立窗口模式打开",

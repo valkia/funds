@@ -16,6 +16,7 @@
         "
         :style="seciList.length > 0 ? { minHeight: '55px' } : {}"
       >
+        <!--   这里是顶部4个     -->
         <div
           v-for="(el, index) in indFundData"
           :draggable="isEdit"
@@ -252,7 +253,7 @@
                 {{
                   el.hasReplace ? el.gztime.substr(5, 5) : el.gztime.substr(10)
                 }}
-                
+
               </td>
               <th
                 style="text-align:center"
@@ -290,67 +291,6 @@
           </tbody>
         </table>
 
-        <!-- <table :class="tableHeight" class="detailTable">
-          <thead>
-            <tr>
-              <th class="align-left">
-                <div>基金名称</div>
-                <p>基金编码</p>
-              </th>
-              <th>
-                <div>持有收益率</div>
-                <p>持有收益</p>
-              </th>
-              <th>
-                <div>估算涨幅</div>
-                <p>估算收益</p>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(el, index) in dataList"
-              :key="el.fundcode"
-              :draggable="isEdit"
-              :class="drag"
-              @dragstart="handleDragStart($event, el)"
-              @dragover.prevent="handleDragOver($event, el)"
-              @dragenter="handleDragEnter($event, el, index)"
-              @dragend="handleDragEnd($event, el)"
-            >
-              <td
-                :class="
-                  isEdit ? 'fundName-noclick align-left' : 'fundName align-left'
-                "
-                :title="el.name"
-                @click.stop="!isEdit && fundDetail(el)"
-              >
-                <div>{{ el.name }}</div>
-                <p>{{ el.fundcode }}</p>
-              </td>
-              <td :class="el.costGains >= 0 ? 'up' : 'down'">
-                <div>{{ el.cost > 0 ? el.costGainsRate + "%" : "" }}</div>
-                <p>
-                  {{
-                  parseFloat(el.costGains).toLocaleString("zh", {
-                    minimumFractionDigits: 2,
-                  })
-                }}
-                </p>
-              </td>
-              <td :class="el.gszzl >= 0 ? 'up' : 'down'">
-                <div>{{ el.gszzl }}%</div>
-                <p>
-                  {{
-                    parseFloat(el.gains).toLocaleString("zh", {
-                      minimumFractionDigits: 2,
-                    })
-                  }}
-                </p>
-              </td>
-            </tr>
-          </tbody>
-        </table> -->
       </div>
     </div>
     <p v-if="isEdit" class="tips">
@@ -489,6 +429,7 @@ import indDetail from "../common/indDetail";
 import fundDetail from "../common/fundDetail";
 import changeLog from "../common/changeLog";
 import market from "../common/market";
+import {getKlines, getPrice} from '../common/js/binance'
 //防抖
 let timeout = null;
 function debounce(fn, wait = 700) {
@@ -626,6 +567,7 @@ export default {
       }
     }, 10);
     this.init();
+    this.init2();
   },
   computed: {
     allGains() {
@@ -749,7 +691,59 @@ export default {
         opacityValue: this.opacityValue,
       });
     },
+    init2(){
+      console.log(`init2`)
+      const resultList = {}
+      const setPriceList = async (symbol) => {
+        console.log(`setPriceList`)
+        let res = await getPrice(symbol)
+        console.log(res)
+        resultList[symbol] = res
+
+        //let res1 = await showKline('SOL-USDT')
+        //console.log(res1)
+      }
+
+      const showKline = async (key) => {
+        console.log(key)
+        let res = await getKlines(key, '15m')
+        console.log(res)
+
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        let option;
+
+        option = {
+          xAxis: {
+            data: []
+          },
+          yAxis: {},
+          series: [{
+            type: 'k',
+            data: []
+          }]
+        };
+
+        for (let i = 0; i < res.length; i++) {
+          const date = new Date(res[i][0]).toLocaleString().replace(/:\d{1,2}$/,' ') // 时间戳
+          const tmp = []
+          tmp[0] = res[i][1] // 开盘 0
+          tmp[3] = res[i][2] // 最高 3
+          tmp[2] = res[i][3] // 最低 2
+          tmp[1] = res[i][4] // 收盘 1
+          option.xAxis.data.push(date)
+          option.series[0].data.push(tmp)
+        }
+
+        option && myChart.setOption(option);
+
+      }
+
+      setPriceList('SOL-USDT')
+
+    },
     init() {
+      console.log(`init1`)
       chrome.storage.sync.get(
         [
           "RealtimeFundcode",
