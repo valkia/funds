@@ -110,7 +110,7 @@
         >
           <el-option
             v-for="item in searchOptions"
-            :key="item.value"
+            :key="item.key"
             :label="item.label"
             :value="item.value"
           >
@@ -250,9 +250,9 @@
                 }}
               </td>
               <td v-if="!isEdit">
-                {{
+<!--                {{
                   el.hasReplace ? el.gztime.substr(5, 5) : el.gztime.substr(10)
-                }}
+                }}-->
 
               </td>
               <th
@@ -429,7 +429,7 @@ import indDetail from "../common/indDetail";
 import fundDetail from "../common/fundDetail";
 import changeLog from "../common/changeLog";
 import market from "../common/market";
-import {getKlines, getPrice} from '../common/js/binance'
+import {getType,getKlines, getPrice} from '../common/js/binance'
 //防抖
 let timeout = null;
 function debounce(fn, wait = 700) {
@@ -494,39 +494,7 @@ export default {
         {
           value: "1.000300",
           label: "沪深300",
-        },
-        {
-          value: "0.399001",
-          label: "深证成指",
-        },
-        {
-          value: "1.000688",
-          label: "科创50",
-        },
-        {
-          value: "0.399006",
-          label: "创业板指",
-        },
-        {
-          value: "0.399005",
-          label: "中小板指",
-        },
-        {
-          value: "100.HSI",
-          label: "恒生指数",
-        },
-        {
-          value: "100.DJIA",
-          label: "道琼斯",
-        },
-        {
-          value: "100.NDX",
-          label: "纳斯达克",
-        },
-        {
-          value: "100.SPX",
-          label: "标普500",
-        },
+        }
       ],
       sltSeci: "",
       darkMode: false,
@@ -554,6 +522,8 @@ export default {
       opacityValue: 0,
       isRefresh: false,
       marketShadow: false,
+
+      typeList:[]
     };
   },
   mounted() {
@@ -613,11 +583,11 @@ export default {
         className += "more-width";
       } else {
         let tablist = [
-          this.showAmount,
-          this.showGains,
-          this.showCost,
-          this.showCostRate,
-          this.showGSZ,
+          this.showAmount, // 显示持有金额
+          this.showGains, // 显示估值收益
+          this.showCost,  // 显示持有收益
+          this.showCostRate, // 显示持有收益率
+          this.showGSZ,// 显示估算净值
         ];
         let num = 0;
         tablist.forEach((val) => {
@@ -691,9 +661,13 @@ export default {
         opacityValue: this.opacityValue,
       });
     },
-    init2(){
+    async init2() {
       console.log(`init2`)
+
+      let res= await getType()
+      this.typeList = res.data
       const resultList = {}
+
       const setPriceList = async (symbol) => {
         console.log(`setPriceList`)
         let res = await getPrice(symbol)
@@ -725,7 +699,7 @@ export default {
         };
 
         for (let i = 0; i < res.length; i++) {
-          const date = new Date(res[i][0]).toLocaleString().replace(/:\d{1,2}$/,' ') // 时间戳
+          const date = new Date(res[i][0]).toLocaleString().replace(/:\d{1,2}$/, ' ') // 时间戳
           const tmp = []
           tmp[0] = res[i][1] // 开盘 0
           tmp[3] = res[i][2] // 最高 3
@@ -882,28 +856,21 @@ export default {
     selectChange() {
       this.searchOptions = [];
     },
-    remoteMethod(query) {
+    async remoteMethod(query) {
       if (query !== "") {
         this.loading = true;
-        let url =
-          "https://fundsuggest.eastmoney.com/FundSearch/api/FundSearchAPI.ashx?&m=9&key=" +
-          query +
-          "&_=" +
-          new Date().getTime();
-        this.$axios.get(url).then((res) => {
-          this.searchOptions = res.data.Datas.filter((val) => {
-            let hasCode = this.fundListM.some((currentValue, index, array) => {
-              return currentValue.code == val.CODE;
-            });
-            return !hasCode;
-          }).map((val) => {
-            return {
-              value: val.CODE,
-              label: val.NAME,
-            };
+        this.searchOptions = this.typeList.filter((val) => {
+          let hasCode = this.fundListM.some((currentValue, index, array) => {
+            return currentValue.code == val.instId;
           });
-          this.loading = false;
+          return !hasCode && val.instId.indexOf(query)>-1;
+        }).map((val) => {
+            return {
+              value: val.instId,
+              label: val.instId,
+            };
         });
+        this.loading = false;
       } else {
         this.searchOptions = [];
       }
@@ -1019,80 +986,83 @@ export default {
       });
     },
     getData(type) {
-      let fundlist = this.fundListM.map((val) => val.code).join(",");
-      let url =
-        "https://fundmobapi.eastmoney.com/FundMNewApi/FundMNFInfo?pageIndex=1&pageSize=200&plat=Android&appType=ttjj&product=EFund&Version=1&deviceid=" +
-        this.userId +
-        "&Fcodes=" +
-        fundlist;
-      this.$axios
-        .get(url)
-        .then((res) => {
-          this.loadingList = false;
-          let data = res.data.Datas;
-          this.dataList = [];
-          let dataList = [];
+      this.dataList = [];
+      let dataList = [];
+      this.fundListM.map(async (res) => {
+        let val = await getPrice(res.code)
 
-          data.forEach((val) => {
-            let data = {
-              fundcode: val.FCODE,
-              name: val.SHORTNAME,
-              jzrq: val.PDATE,
-              dwjz: isNaN(val.NAV) ? null : val.NAV,
-              gsz: isNaN(val.GSZ) ? null : val.GSZ,
-              gszzl: isNaN(val.GSZZL) ? 0 : val.GSZZL,
-              gztime: val.GZTIME,
-            };
-            if (val.PDATE != "--" && val.PDATE == val.GZTIME.substr(0, 10)) {
-              data.gsz = val.NAV;
-              data.gszzl = isNaN(val.NAVCHGRT) ? 0 : val.NAVCHGRT;
-              data.hasReplace = true;
-            }
 
-            let slt = this.fundListM.filter(
+        this.loadingList = false;
+
+          let data = {
+            fundcode: val.instId,
+            name: val.instId,
+            jzrq: val.PDATE,//截止日期
+            dwjz: isNaN(val.NAV) ? null : val.NAV,
+            gsz: isNaN(val.GSZ) ? null : val.GSZ,
+            gszzl: isNaN(val.GSZZL) ? 0 : val.GSZZL,
+            gztime: val.GZTIME,
+          };
+          if (val.PDATE != "--" && val.PDATE == val?.GZTIME?.substr(0, 10)) {
+            data.gsz = val.NAV;
+            data.gszzl = isNaN(val.NAVCHGRT) ? 0 : val.NAVCHGRT;
+            data.hasReplace = true;
+          }
+
+          let slt = this.fundListM.filter(
               (item) => item.code == data.fundcode
-            );
-            data.num = slt[0].num;
-            data.cost = slt[0].cost;
-            data.amount = this.calculateMoney(data);
-            data.gains = this.calculate(data, data.hasReplace);
-            data.costGains = this.calculateCost(data);
-            data.costGainsRate = this.calculateCostRate(data);
+          );
+          data.num = slt[0]?.num;
+          data.cost = slt[0]?.cost;
+          data.amount = this.calculateMoney(data);
+          data.gains = this.calculate(data, data.hasReplace);
+          data.costGains = this.calculateCost(data);
+          data.costGainsRate = this.calculateCostRate(data);
 
-            if (data.fundcode == this.RealtimeFundcode) {
-              if (this.showBadge == 1) {
-                if (this.BadgeContent == 1) {
-                  chrome.runtime.sendMessage({
-                    type: "refreshBadge",
-                    data: data,
-                  });
-                }
+          // 实时更新？
+          if (data.fundcode == this.RealtimeFundcode) {
+            if (this.showBadge == 1) {
+              if (this.BadgeContent == 1) {
+                chrome.runtime.sendMessage({
+                  type: "refreshBadge",
+                  data: data,
+                });
               }
             }
-
-            dataList.push(data);
-          });
-          if (this.showBadge == 1) {
-            if (this.BadgeContent == 2) {
-              chrome.runtime.sendMessage({
-                type: "refreshBadgeAllGains",
-                data: data,
-              });
-            }
           }
 
-          this.dataListDft = [...dataList];
-          if (type == "add") {
-            this.dataList = dataList;
-          } else if (this.sortTypeObj.type != "none") {
-            this.sortType[this.sortTypeObj.name] = this.sortTypeObj.type;
-            this.dataList = dataList.sort(
+          dataList.push(data);
+
+        // 更新图标数字
+        if (this.showBadge == 1) {
+          if (this.BadgeContent == 2) {
+            chrome.runtime.sendMessage({
+              type: "refreshBadgeAllGains",
+              data: data,
+            });
+          }
+        }
+
+        this.dataListDft = [...dataList];
+        // add 情况下的getData 排序
+        if (type == "add") {
+          this.dataList = dataList;
+        } else if (this.sortTypeObj.type != "none") {
+          this.sortType[this.sortTypeObj.name] = this.sortTypeObj.type;
+          this.dataList = dataList.sort(
               this.compare(this.sortTypeObj.name, this.sortTypeObj.type)
-            );
-          } else {
-            this.dataList = dataList;
-          }
-        })
+          );
+        } else {
+          this.dataList = dataList;
+        }
+
+
+      })
+      let url =
+        ""
+      this.$axios
+        .get(url)
+        .then((res) => {})
         .catch((error) => {});
     },
     changeNum(item, ind) {
@@ -1166,7 +1136,9 @@ export default {
       }
     },
     save() {
+      console.log(this.fundListM)
       this.fundcode.forEach((code) => {
+
         let val = {
           code: code,
           num: 0,

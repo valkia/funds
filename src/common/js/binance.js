@@ -21,3 +21,6 @@ export const getPrice = (symbol)=>{
 export const getKlines = (symbol,interval)=>{
    return  get(`https://www.okex.com/api/v5/market/index-candles?instId=${symbol}&bar=${interval}&limit=50`,{})
 }
+export const getType = ()=>{
+   return  get(`https://www.okex.com/api/v5/public/instruments?instType=SPOT`,{})
+}
