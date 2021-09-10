@@ -13,6 +13,7 @@
 let echarts = require("echarts/lib/echarts");
 import "./js/customed.js";
 import "./js/dark.js";
+import { getKlines} from "./js/binance.js";
 
 require("echarts/lib/chart/line");
 
@@ -438,30 +439,28 @@ export default {
       var _bb = Math.abs(Math.min.apply(null, data)).toFixed(2);
       return _aa > _bb ? _aa : _bb;
     },
-    getData() {
+    async getData() {
       this.loading = true;
-      let url = `https://fundmobapi.eastmoney.com/FundMApi/FundVarietieValuationDetail.ashx?FCODE=${
-        this.fund.fundcode
-      }&deviceid=Wap&plat=Wap&product=EFund&version=2.0.0&_=${new Date().getTime()}`;
-      this.$axios.get(url).then((res) => {
-        this.loading = false;
-        let dataList = res.data.Datas.map((item) => item.split(","));
-        this.option.series[0].data = dataList.map((item) =>
+
+      let res = await getKlines(this.fund.fundcode,'1m')
+      console.log(res)
+      this.loading = false;
+      let dataList = res.data.Datas.map((item) => item.split(","));
+      this.option.series[0].data = dataList.map((item) =>
           (+item[2]).toFixed(2)
-        );
-        this.option.series[1].data = dataList.map((item) =>
+      );
+      this.option.series[1].data = dataList.map((item) =>
           (+item[2]).toFixed(2)
-        );
-        let aa = this.handle_num(this.option.series[0].data);
-        this.DWJZ = res.data.Expansion.DWJZ;
-        this.option.yAxis[0].min = -aa;
-        this.option.yAxis[0].max = aa;
-        this.option.yAxis[0].interval = aa / 4;
-        this.option.yAxis[1].min = -aa;
-        this.option.yAxis[1].max = aa;
-        this.option.yAxis[1].interval = aa / 4;
-        this.myChart.setOption(this.option);
-      });
+      );
+      let aa = this.handle_num(this.option.series[0].data);
+      this.DWJZ = res.data.Expansion.DWJZ;
+      this.option.yAxis[0].min = -aa;
+      this.option.yAxis[0].max = aa;
+      this.option.yAxis[0].interval = aa / 4;
+      this.option.yAxis[1].min = -aa;
+      this.option.yAxis[1].max = aa;
+      this.option.yAxis[1].interval = aa / 4;
+      this.myChart.setOption(this.option);
     },
   },
 };
