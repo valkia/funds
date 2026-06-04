@@ -26,6 +26,7 @@
 - 支持查看估值走势图，净值、收益等走势图
 - 支持支持查看基金的股票持仓明细
 - 支持查看基金基本信息与基金经理信息
+- 支持基金分组功能
 - 自定义顶部指数内容
 - 自定义基金列表展示内容
 - 指数与基金拖拽排序功能
@@ -33,29 +34,34 @@
 - 添加基金时支持按拼音、汉字、编码模糊搜索，支持批量添加
 - 行情中心展示，两市资金、行业板块、北向资金、南向资金
 
+## 截图识别导入功能推荐
+
+小程序端已支持截图一键导入功能，欢迎使用！
+
+
 ## 如何使用
 
 **强烈推荐使用 Chrome 商店安装**（这样才能获得自动更新）：[点击跳转至 Chrome 扩展商店](https://chrome.google.com/webstore/detail/dhdelcemeednchdmijiocipbjlknndff)
 
-若因网络问题，可以下载 CRX 文件手动安装（无法自动更新最新版）：[下载地址 1](https://github.com/x2rr/funds/releases)　[下载地址 2](https://gitee.com/rabt/funds/releases)
+若因网络问题，可以下载 CRX 文件手动安装（无法自动更新最新版）：[下载地址 1](https://github.com/x2rr/funds/releases)　[下载地址 2](https://github.com/x2rr/funds/releases)
 
 插件已上架 Microsoft Edge 扩展商店：[点击跳转至 Microsoft Edge 扩展商店](https://microsoftedge.microsoft.com/addons/detail/kophadiajpobbfoobhclbobddkoindoi)
 
-插件已上架火狐 Firefox 扩展商店：[点击跳转至火狐 Firefox 扩展商店](https://addons.mozilla.org/zh-CN/firefox/addon/funds/)
+Firefox 扩展商店暂已下架 ~~插件已上架火狐 Firefox 扩展商店：[点击跳转至火狐 Firefox 扩展商店](https://addons.mozilla.org/zh-CN/firefox/addon/funds/)~~
 
 插件推出小程序版‘韭菜计算助手’欢迎使用！
 
-![小程序](https://gitee.com/rabt/Picture/raw/master/img/mp.jpg)
+![小程序](https://github.com/x2rr/Picture/raw/master/img/mp.jpg)
 
-![主界面1](https://gitee.com/rabt/Picture/raw/master/img/20200717165330.png)
+![主界面1](https://github.com/x2rr/Picture/raw/master/img/20200717165330.png)
 
-![主界面2](https://gitee.com/rabt/Picture/raw/master/img/20200916120011.png)
+![主界面2](https://github.com/x2rr/Picture/raw/master/img/20200916120011.png)
 
-![主界面3](https://gitee.com/rabt/Picture/raw/master/img/20200916120012.png)
+![主界面3](https://github.com/x2rr/Picture/raw/master/img/20200916120012.png)
 
-![主界面4](https://gitee.com/rabt/Picture/raw/master/img/20200907111218.png)
+![主界面4](https://github.com/x2rr/Picture/raw/master/img/20200907111218.png)
 
-![主界面5](https://gitee.com/rabt/Picture/raw/master/img/20200907111226.png)
+![主界面5](https://github.com/x2rr/Picture/raw/master/img/20200907111226.png)
 
 ## 框架介绍
 
@@ -78,6 +84,64 @@
 通过从 manifest.json 文件中读取 name 和 version 字段,构建{name}-v{version}.zip 这种格式的压缩文件。
 
 ## 更新说明
+
+### v3.4.3
+
+- 修复更新后数据丢失问题。
+
+### v3.4.2
+
+- 修复因基金数据较大时，无法同步小程序端数据的问题。
+- 详情页增加标记，可展示小程序端加减仓与定投记录。
+
+### v3.4.1
+
+- 优化收益计算方式。
+
+### v3.4.0
+
+- 账号服务请求地址调整，旧版本未来将无法登录，请尽快更新。
+
+### v3.3.7
+
+- 优化估值计算方式。
+
+### v3.3.6
+
+- 优化基金估值数据与小程序端一致。
+
+### v3.3.5
+
+- 优化账号与同步相关操作体验。
+- 独立窗口模式表格滚动与展示优化。
+  
+### v3.3.4
+
+- 优化日收益计算方式。
+
+### v3.3.3
+
+- 修复休市后角标数值错误问题。
+- 角标收益支持全部分组选项。
+- 优化代码，精简无关权限。
+  
+### v3.3.2
+
+- 行情中心，板块功能优化。
+
+### v3.3.1
+
+- 修复暗色模式样式问题。
+  
+### v3.3.0
+
+- 增加分组功能。
+- 增加更多指数。
+- 增加最大可展示指数数量。
+- 增加总金额展示。
+
+<details>
+<summary>点击这里展开/折叠历史更新说明</summary>
 
 ### v3.0.3
 
@@ -288,6 +352,19 @@
 
 - 修复个别基金数据无法正常获取的问题；
 
+</details>
+
+## Star History
+
+<a href="https://www.star-history.com/#x2rr/funds&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=x2rr/funds&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=x2rr/funds&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=x2rr/funds&type=date&legend=top-left" />
+ </picture>
+</a>
+
 ## 隐私协议
 
-[点击跳转](https://x2rr.github.io/funds/privacy.html)
+[点击跳转](https://x2rr.github.io/funds/privacy.html)  
+
